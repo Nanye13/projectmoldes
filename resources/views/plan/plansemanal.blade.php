@@ -37,60 +37,13 @@
                 </ul>
             </div>
         @endif
-
+        @if (session('status'))
+            <div class="alert alert-success" id="success-alert">
+                {{ session('status') }}
+            </div>
+        @endif
         <br>
         <br><br>
-
-        {{-- <div class="container">
-                        <h2 class="text-center">
-                            {{ \Carbon\Carbon::parse($semana_actual->inicio_semana)->translatedFormat('d-M-Y') }} -
-                            {{ \Carbon\Carbon::parse($semana_actual->fin_semana)->translatedFormat('d-M-Y') }} </h2>
-
-                        <div class="row">
-                            @foreach ($weekDays as $day)
-                                <div class="col-md-2">
-                                    <div class="card mb-3">
-                                        <div class="card-header bg-primary text-white">
-                                            {{ $day['name'] }} ({{ $day['date'] }})
-                                        </div>
-                                        <div class="card-body">
-                                            <h6>Área A</h6>
-                                            <p><strong>Horas Disponibles:</strong> {{ $day['limit_A'] }} hrs</p>
-                                            <p>
-                                                <strong>Horas Ocupadas:</strong>
-                                                <span class="{{ $day['exceeded_A'] ? 'text-danger fw-bold' : '' }}">
-                                                    {{ $day['hours_A'] }} hrs
-                                                </span>
-                                            </p>
-
-                                            <h6>Área B</h6>
-                                            <p><strong>Horas Disponibles:</strong> {{ $day['limit_B'] }} hrs</p>
-                                            <p>
-                                                <strong>Horas Ocupadas:</strong>
-                                                <span class="{{ $day['exceeded_B'] ? 'text-danger fw-bold' : '' }}">
-                                                    {{ $day['hours_B'] }} hrs
-                                                </span>
-                                            </p>
-
-                                            <h6>Tareas Asignadas:</h6>
-                                            <ul class="list-group">
-                                                @forelse ($day['tasks'] as $tarea)
-                                                    <li class="list-group-item">
-                                                        <strong>{{ $tarea->nombre }}</strong>
-                                                        ({{ $tarea->estimated_hours }} hrs)
-                                                        - Área {{ $tarea->area }}
-                                                    </li>
-                                                @empty
-                                                    <li class="list-group-item text-muted">No hay tareas asignadas</li>
-                                                @endforelse
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div> --}}
-
 
         <div class="container-fluid">
             <div class="row">
@@ -101,35 +54,66 @@
 
                 @foreach ($weekDays as $day)
                     <div class="col-md p-2 border">
-                        <h6 class="text-center">{{ $day['name'] }}<br>{{ $day['date'] }}</h6>
-                        <hr>
-                        <label for="">Técnicos en turno</label>
+                        <h6 class="text-center">{{ ucfirst($day['name']) }}<br>{{ $day['date'] }}</h6>
                         <button class="btn btn-primary"
-                            onclick="guardartecdia('{{ $semana_actual->id }}','{{ $day['date'] }}','{{ $day['name'] }}')">Agregar
-                            Tecnicos</button>
-                        <table>
-                            <thead>
-                                <th>Nombre</th>
-                                <th>Tipo</th>
-                                <th>Horas</th>
-                            </thead>
-                            <tbody>
-                                @foreach ($day['tecnicos'] as $tecnico)
-                                    <tr>
-                                        <td>{{ $tecnico['nombre'] }}</td>
-                                        <td>{{ $tecnico['area'] }}</td>
-                                        <td>{{ $tecnico['horas'] }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                        <div class="day-tasks" style="min-height: 500px;">
+                        onclick="guardartecdia('{{ $semana_actual->id }}','{{ $day['date'] }}','{{ $day['name'] }}')">Agregar
+                        Tecnicos</button>
+                        <!-- Indicadores de horas -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white">Área A</div>
+                                    <div class="card-body">
+                                        <p>Asignadas: {{ $day['horas_asignadas']['A'] }}h</p>
+                                        <p>Utilizadas: {{ $day['horas_utilizadas']['A'] }}h</p>
+                                        <p
+                                            class="{{ $day['horas_disponibles']['A'] < 0 ? 'text-danger' : 'text-success' }}">
+                                            Disponibles: {{ $day['horas_disponibles']['A'] }}h
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-info text-white">Área B</div>
+                                    <div class="card-body">
+                                        <p>Asignadas: {{ $day['horas_asignadas']['B'] }}h</p>
+                                        <p>Utilizadas: {{ $day['horas_utilizadas']['B'] }}h</p>
+                                        <p
+                                            class="{{ $day['horas_disponibles']['B'] < 0 ? 'text-danger' : 'text-success' }}">
+                                            Disponibles: {{ $day['horas_disponibles']['B'] }}h
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formulario para agregar tarea -->
+                        <button class="btn btn-primary mb-3" onclick="agregartask('{{ $day['date'] }}')">
+                            Agregar Tarea
+                        </button>
+
+                        <!-- Lista de tareas ordenadas por prioridad -->
+                        <div class="task-list">
                             @foreach ($day['tasks'] as $task)
-                                <div class="card mb-2">
-                                    <div class="card-body p-2">
-                                        <small class="text-muted">{{ $task->hora_inicio }}</small>
-                                        <p class="mb-0">{{ $task->molde_id }}</p>
-                                        <span class="badge bg-primary">{{ $task->area }}</span>
+                                <div class="card mb-2 priority-{{ $task->priority }}">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <span class="badge bg-secondary">#{{ $task->priority }}</span>
+                                                <strong>{{ $task->molde_id }}</strong>
+                                            </div>
+                                            <div>
+                                                <span class="badge bg-{{ $task->area == 'A' ? 'primary' : 'info' }}">
+                                                    Área {{ $task->area }}
+                                                </span>
+                                                <span class="text-muted">{{ $task->estimated_hours }}h</span>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <small>{{ $task->hora_inicio }} - {{ $task->hora_fin }}</small>
+                                            <p class="mb-0">{{ $task->notes }}</p>
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach
@@ -202,11 +186,150 @@
         </div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="taskModal" tabindex="-1" role="dialog" aria-labelledby="taskModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <form id="taskForm" method="POST" action="{{ route('task.store') }}">
+                    @csrf
+                    <input type="hidden" name="task_id" id="taskId">
+                    <input type="hidden" name="work_week_id" value="{{ $semana_actual->id ?? '' }}">
+
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="taskModalLabel">Nueva Tarea</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label for="title" class="font-weight-bold">Molde*:</label>
+                                    <select name="molde_id" id="molde_id" class="form-control">
+                                        @foreach ($moldes as $molde)
+                                            <option value="">{{ $molde->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                  
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="task_date" class="font-weight-bold">Fecha *</label>
+                                    <input type="date" class="form-control" id="task_date" name="task_date"
+                                        required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="start_time" class="font-weight-bold">Hora de inicio *</label>
+                                    <input type="time" class="form-control" id="start_time" name="start_time"
+                                        required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="end_time" class="font-weight-bold">Hora de fin *</label>
+                                    <input type="time" class="form-control" id="end_time" name="end_time"
+                                        required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="estimated_hours" class="font-weight-bold">Horas estimadas
+                                        *</label>
+                                    <input type="number" step="0.5" class="form-control" id="estimated_hours"
+                                        name="estimated_hours" min="0.5" max="24" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="area" class="font-weight-bold">Área *</label>
+                                    <select class="form-control" id="area_tipo" name="area_tipo" required>
+                                        <option value="A">Área A
+                                        </option>
+                                        <option value="B">Área B
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="priority" class="font-weight-bold">Prioridad *</label>
+                                    <select class="form-control" id="priority" name="priority" required>
+                                        <option value="1">🔥 Prioridad 1 (Urgente)</option>
+                                        <option value="2">🔴 Prioridad 2 (Alta)</option>
+                                        <option value="3" selected>🟡 Prioridad 3 (Media)</option>
+                                        <option value="4">🔵 Prioridad 4 (Baja)</option>
+                                        <option value="5">⚪ Prioridad 5 (Mínima)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="notes" class="font-weight-bold">Notas adicionales</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3"
+                                placeholder="Detalles importantes, enlaces, observaciones..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar Tarea
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
         crossorigin="anonymous"></script>
+    <script>
+        // Función para agregar tarea (usando AJAX)
+        function addTask(formData) {
+            fetch('/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Recargar para ver cambios
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                });
+        }
 
+        // // Modal para agregar tarea
+        // function showTaskModal(date) {
+        //     // Aquí implementa tu modal con campos para:
+        //     // - molde_id
+        //     // - área (A/B)
+        //     // - prioridad
+        //     // - horas estimadas
+        //     // - notas
+        //     // Y validar que no exceda horas disponibles
+        // }
+    </script>
     <script>
         $("#success-alert").fadeTo(2000, 500).slideUp(500, function() {
             $("#success-alert").alert('close');
@@ -220,12 +343,82 @@
 
 
         }
+
+        function agregartask(fecha) {
+            $('#taskModal').modal('show');
+            $('#task_date').val(fecha);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Calcula horas automáticamente al cambiar tiempos
+            const startTime = document.getElementById('start_time');
+            const endTime = document.getElementById('end_time');
+            const estimatedHours = document.getElementById('estimated_hours');
+
+            function calculateHours() {
+                if (startTime.value && endTime.value) {
+                    const start = new Date(`2000-01-01T${startTime.value}`);
+                    const end = new Date(`2000-01-01T${endTime.value}`);
+
+                    // Validar que la hora final sea posterior a la inicial
+                    if (end <= start) {
+                        estimatedHours.value = '';
+                        alert('La hora de fin debe ser posterior a la hora de inicio');
+                        return;
+                    }
+
+                    const diff = (end - start) / (1000 * 60 * 60); // Diferencia en horas
+                    estimatedHours.value = diff.toFixed(1);
+                }
+            }
+
+            startTime.addEventListener('change', calculateHours);
+            endTime.addEventListener('change', calculateHours);
+
+            // Validar horas estimadas manuales
+            estimatedHours.addEventListener('change', function() {
+                if (this.value < 0.5) {
+                    this.value = 0.5;
+                } else if (this.value > 24) {
+                    this.value = 24;
+                }
+            });
+
+            // Manejar apertura del modal
+            $('#taskModal').on('show.bs.modal', function(event) {
+                const button = $(event.relatedTarget);
+                const date = button.data('date');
+                const modal = $(this);
+
+                // Configurar para nueva tarea
+                modal.find('.modal-title').text('Nueva Tarea');
+                modal.find('#task_date').val(date);
+                modal.find('#taskId').val('');
+                modal.find('form')[0].reset();
+
+                // Establecer hora por defecto (09:00 - 10:00)
+                const now = new Date();
+                const defaultStart = now.getHours() + ':00';
+                const defaultEnd = (now.getHours() + 1) + ':00';
+
+                modal.find('#start_time').val(defaultStart);
+                modal.find('#end_time').val(defaultEnd);
+            });
+
+            // Manejar envío del formulario
+            $('#taskForm').on('submit', function(e) {
+                if (!validateTaskForm()) {
+                    e.preventDefault();
+                }
+            });
+
+            function validateTaskForm() {
+                // Validación adicional puede ir aquí
+                return true;
+            }
+
+        });
     </script>
-
-
-
-
-
 
 
 

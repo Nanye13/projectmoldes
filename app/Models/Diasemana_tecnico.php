@@ -20,11 +20,13 @@ class Diasemana_tecnico extends Model
         'dia_semana',
         'tecnico_id',
         'horas',
-        'estatus'
+        'estatus',
+        'area'
     ];
 
+    // En Diasemana_tecnico.php
     public function tecnico()
     {
-        return $this->belongsTo(Tecnico::class, 'id_tecnico');
+        return $this->belongsTo(Tecnico::class, 'tecnico_id', 'id');
     }
 }

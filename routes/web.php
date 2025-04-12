@@ -3,6 +3,7 @@
 use App\Http\Controllers\DiaSemanaTecController;
 use App\Http\Controllers\MoldeController;
 use App\Http\Controllers\PlanSemanalController;
+use App\Http\Controllers\TaksController;
 use App\Http\Controllers\TecnicoController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,5 +37,6 @@ Route::middleware('auth')->group(function () {
     Route::put('darbajatecnico/{id}', [TecnicoController::class, 'bajatecnico'])->name('darbajatecnico');
     Route::put('daraltatecnico/{id}', [TecnicoController::class, 'altatecnico'])->name('daraltatecnico');
     Route::resource('disemtec', DiaSemanaTecController::class);
+    Route::resource('task',TaksController::class);
 
 });

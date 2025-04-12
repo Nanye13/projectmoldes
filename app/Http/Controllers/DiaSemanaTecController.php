@@ -42,6 +42,7 @@ class DiaSemanaTecController extends Controller
         $horas = $request->input('horas');
         $tipo = $request->input('tipo');
 
+
         Diasemana_tecnico::create([
             'work_week_id' => $semana_id,
             'dia_semana' => $dia_semana,

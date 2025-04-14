@@ -9,19 +9,19 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 @if (session('status'))
-                <div class="alert alert-success" id="success-alert">
-                    {{ session('status') }}
-                </div>
-            @endif
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+                    <div class="alert alert-success" id="success-alert">
+                        {{ session('status') }}
+                    </div>
+                @endif
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
                 <div class="p-6 bg-white border-b border-gray-200">
                     Moldes
 
@@ -36,6 +36,8 @@
                         <thead>
                             <th>#</th>
                             <th>Nombre</th>
+                            <th>Tipo Mantenmiento</th>
+                            <th>Horas</th>
                             <th>Estatus</th>
                             <th>Acciones</th>
                         </thead>
@@ -54,6 +56,8 @@
                                             Inactivo
                                         @endif
                                     </td>
+                                    <td>{{$mol->tipo_mantenimiento}}</td>
+                                    <td>{{$mol->horas}}</td>
                                     <td>
                                         <button class="btn btn-primary"
                                             onclick="editarmolde('{{ $mol->id }}', '{{ $mol->nombre }}')">Editar</button>
@@ -93,6 +97,12 @@
                     <div class="modal-body">
                         <label for="">Nombre:</label>
                         <input type="text" class="form-control" name="nombre" id="nombre">
+                        <label for="">Tipo Mantenmiento:</label>
+                        <select name="tipo" id="tipo" class="form-control">
+                            <option value="B">Tipo B</option>
+                        </select>
+                        <label for="">Horas:</label>
+                        <input type="text" class="form-control" id="horas" name="horas">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -117,6 +127,12 @@
                     <div class="modal-body">
                         <label for="">Nombre:</label>
                         <input type="text" class="form-control" name="nombrem" id="nombrem">
+                        <label for="">Tipo Mantenmiento:</label>
+                        <select name="tipom" id="tipom" class="form-control">
+                            <option value="B">Tipo B</option>
+                        </select>
+                        <label for="">Horas:</label>
+                        <input type="text" class="form-control" id="horasm" name="horasm">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -171,7 +187,7 @@
                     @csrf
                     @method('PUT')
                     <div class="modal-body" style="text-align: center">
-                       
+
                         <h4>¿Está seguro de dar de alta este molde?</h4>
                     </div>
                     <div class="modal-footer">
@@ -189,12 +205,14 @@
         $("#success-alert").fadeTo(2000, 500).slideUp(500, function() {
             $("#success-alert").alert('close');
         });
-        
-        function editarmolde(id_molde, nombre) {
+
+        function editarmolde(id_molde, nombre, tipo, horas) {
             $('#editarmold').modal('show');
             $('#form').attr('action', "{{ route('molde.update', '') }}" + "/" + id_molde);
             $('#id_molde').val(id_molde);
             $('#nombrem').val(nombre);
+            $('#tipom').val(tipo);
+            $('#horasm').val(horas);
         }
 
         function darbaja(id_molde) {
@@ -202,6 +220,7 @@
             $('#bajam').attr('action', "{{ route('darbajamolde', '') }}" + "/" + id_molde);
 
         }
+
         function altamol(id_molde) {
             $('#daralta').modal('show');
             $('#altam').attr('action', "{{ route('daraltamolde', '') }}" + "/" + id_molde);

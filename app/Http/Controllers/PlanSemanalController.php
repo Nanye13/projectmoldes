@@ -28,37 +28,40 @@ class PlanSemanalController extends Controller
     {
         $days = [];
         $currentDate = $week->inicio_semana->copy();
-    
         // Obtener todas las asignaciones de técnicos
         $tecnicosPorDia = Diasemana_tecnico::with('tecnico')
             ->where('work_week_id', $week->id)
             ->get()
             ->groupBy('dia_semana');
-    
+
         // Obtener todas las tareas agrupadas por fecha
         $tareasPorDia = $week->tasks()
             ->orderBy('priority')
             ->get()
-            ->groupBy(function($task) {
+            ->groupBy(function ($task) {
                 return Carbon::parse($task->fecha)->format('Y-m-d');
             });
-    
         while ($currentDate <= $week->fin_semana) {
+            // Saltar si es domingo
+            if ($currentDate->dayOfWeek === Carbon::SUNDAY) {
+                $currentDate->addDay();
+                continue;
+            }
+
             $dateString = $currentDate->format('Y-m-d');
             $dayName = $currentDate->isoFormat('dddd');
-    
+
             // Horas asignadas por área
             $asignaciones = $tecnicosPorDia->get($dateString, collect());
             $horasAsignadasA = $asignaciones->where('area', 'A')->sum('horas');
-
-            // return $asignaciones;
             $horasAsignadasB = $asignaciones->where('area', 'B')->sum('horas');
-    
+
             // Tareas del día ordenadas por prioridad
             $tareasDia = $tareasPorDia->get($dateString, collect());
             $horasUsadasA = $tareasDia->where('area', 'A')->sum('estimated_hours');
             $horasUsadasB = $tareasDia->where('area', 'B')->sum('estimated_hours');
-    
+          
+
             $days[] = [
                 'date' => $dateString,
                 'name' => $dayName,
@@ -75,7 +78,7 @@ class PlanSemanalController extends Controller
                     'A' => $horasAsignadasA - $horasUsadasA,
                     'B' => $horasAsignadasB - $horasUsadasB
                 ],
-                'tecnicos' => $asignaciones->map(function($asign) {
+                'tecnicos' => $asignaciones->map(function ($asign) {
                     return [
                         'id' => $asign->id,
                         'nombre' => $asign->tecnico->nombre ?? 'N/A',
@@ -84,12 +87,59 @@ class PlanSemanalController extends Controller
                     ];
                 })->values()
             ];
-    
+
             $currentDate->addDay();
         }
-    
         return $days;
+
     }
+    //     while ($currentDate <= $week->fin_semana) {
+    //         $dateString = $currentDate->format('Y-m-d');
+    //         $dayName = $currentDate->isoFormat('dddd');
+
+    //         // Horas asignadas por área
+    //         $asignaciones = $tecnicosPorDia->get($dateString, collect());
+    //         $horasAsignadasA = $asignaciones->where('area', 'A')->sum('horas');
+
+    //         // return $asignaciones;
+    //         $horasAsignadasB = $asignaciones->where('area', 'B')->sum('horas');
+
+    //         // Tareas del día ordenadas por prioridad
+    //         $tareasDia = $tareasPorDia->get($dateString, collect());
+    //         $horasUsadasA = $tareasDia->where('area', 'A')->sum('estimated_hours');
+    //         $horasUsadasB = $tareasDia->where('area', 'B')->sum('estimated_hours');
+
+    //         $days[] = [
+    //             'date' => $dateString,
+    //             'name' => $dayName,
+    //             'tasks' => $tareasDia,
+    //             'horas_asignadas' => [
+    //                 'A' => $horasAsignadasA,
+    //                 'B' => $horasAsignadasB
+    //             ],
+    //             'horas_utilizadas' => [
+    //                 'A' => $horasUsadasA,
+    //                 'B' => $horasUsadasB
+    //             ],
+    //             'horas_disponibles' => [
+    //                 'A' => $horasAsignadasA - $horasUsadasA,
+    //                 'B' => $horasAsignadasB - $horasUsadasB
+    //             ],
+    //             'tecnicos' => $asignaciones->map(function($asign) {
+    //                 return [
+    //                     'id' => $asign->id,
+    //                     'nombre' => $asign->tecnico->nombre ?? 'N/A',
+    //                     'area' => $asign->area,
+    //                     'horas' => $asign->horas
+    //                 ];
+    //             })->values()
+    //         ];
+
+    //         $currentDate->addDay();
+    //     }
+
+    //     return $days;
+    // }
 
 
 

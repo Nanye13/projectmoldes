@@ -16,6 +16,8 @@ class CreateMoldesTable extends Migration
         Schema::create('moldes', function (Blueprint $table) {
             $table->id()->start(1)->nocache();
             $table->string('nombre');
+            $table->enum('tipo_mantenimiento', ['A', 'B']);
+            $table->integer('horas');
             $table->integer('estatus');
             $table->timestamps();
         });

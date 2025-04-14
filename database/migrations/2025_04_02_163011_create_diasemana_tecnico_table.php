@@ -20,6 +20,7 @@ class CreateDiasemanaTecnicoTable extends Migration
             $table->foreignId('tecnico_id')->constrained();
             $table->integer('horas'); // 5 o 7 normalmente
             $table->integer('estatus');
+            $table->enum('area', ['A', 'B']);
             $table->timestamps();
         });
     }

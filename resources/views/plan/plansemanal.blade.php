@@ -37,11 +37,6 @@
                 </ul>
             </div>
         @endif
-        @if (session('status'))
-            <div class="alert alert-success" id="success-alert">
-                {{ session('status') }}
-            </div>
-        @endif
         <br>
         <br><br>
 
@@ -56,8 +51,8 @@
                     <div class="col-md p-2 border">
                         <h6 class="text-center">{{ ucfirst($day['name']) }}<br>{{ $day['date'] }}</h6>
                         <button class="btn btn-primary"
-                        onclick="guardartecdia('{{ $semana_actual->id }}','{{ $day['date'] }}','{{ $day['name'] }}')">Agregar
-                        Tecnicos</button>
+                            onclick="guardartecdia('{{ $semana_actual->id }}','{{ $day['date'] }}','{{ $day['name'] }}')">Agregar
+                            Tecnicos</button>
                         <!-- Indicadores de horas -->
                         <div class="row mb-3">
                             <div class="col-md-6">
@@ -193,7 +188,6 @@
             <div class="modal-content">
                 <form id="taskForm" method="POST" action="{{ route('task.store') }}">
                     @csrf
-                    <input type="hidden" name="task_id" id="taskId">
                     <input type="hidden" name="work_week_id" value="{{ $semana_actual->id ?? '' }}">
 
                     <div class="modal-header bg-primary text-white">
@@ -208,11 +202,17 @@
                                 <div class="form-group">
                                     <label for="title" class="font-weight-bold">Molde*:</label>
                                     <select name="molde_id" id="molde_id" class="form-control">
+                                        <option value="">--Selecciona--</option>
                                         @foreach ($moldes as $molde)
-                                            <option value="">{{ $molde->nombre }}</option>
+                                            <option value="{{ $molde->id }}"
+                                                data-tipo="{{ $molde->tipo_mantenimiento }}"
+                                                data-horas="{{ $molde->horas }}">
+                                                {{ $molde->nombre }}
+                                            </option>
                                         @endforeach
+
                                     </select>
-                                  
+
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -227,6 +227,14 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
+                                    <label for="estimated_hours" class="font-weight-bold">Horas estimadas
+                                        *</label>
+                                    <input type="number" step="0.5" class="form-control" id="estimated_hours"
+                                        name="estimated_hours" min="0.5" max="24" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
                                     <label for="start_time" class="font-weight-bold">Hora de inicio *</label>
                                     <input type="time" class="form-control" id="start_time" name="start_time"
                                         required>
@@ -239,24 +247,18 @@
                                         required>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="estimated_hours" class="font-weight-bold">Horas estimadas
-                                        *</label>
-                                    <input type="number" step="0.5" class="form-control" id="estimated_hours"
-                                        name="estimated_hours" min="0.5" max="24" required>
-                                </div>
-                            </div>
+
                         </div>
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="area" class="font-weight-bold">Área *</label>
+                                    <label for="area" class="font-weight-bold">Tipo Mantenimiento *</label>
                                     <select class="form-control" id="area_tipo" name="area_tipo" required>
-                                        <option value="A">Área A
+                                        <option value="">--Selecciona--</option>
+                                        <option value="A">Tipo A
                                         </option>
-                                        <option value="B">Área B
+                                        <option value="B">Tipo B
                                         </option>
                                     </select>
                                 </div>
@@ -298,38 +300,7 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
         crossorigin="anonymous"></script>
-    <script>
-        // Función para agregar tarea (usando AJAX)
-        function addTask(formData) {
-            fetch('/tasks', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload(); // Recargar para ver cambios
-                    } else {
-                        alert('Error: ' + data.message);
-                    }
-                });
-        }
 
-        // // Modal para agregar tarea
-        // function showTaskModal(date) {
-        //     // Aquí implementa tu modal con campos para:
-        //     // - molde_id
-        //     // - área (A/B)
-        //     // - prioridad
-        //     // - horas estimadas
-        //     // - notas
-        //     // Y validar que no exceda horas disponibles
-        // }
-    </script>
     <script>
         $("#success-alert").fadeTo(2000, 500).slideUp(500, function() {
             $("#success-alert").alert('close');
@@ -340,85 +311,94 @@
             $('#dia').val(dia);
             $('#id_semana').val(semana_id);
             $('#nomdia').val(nomdia);
-
-
         }
 
         function agregartask(fecha) {
             $('#taskModal').modal('show');
             $('#task_date').val(fecha);
         }
-
+    </script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Calcula horas automáticamente al cambiar tiempos
-            const startTime = document.getElementById('start_time');
-            const endTime = document.getElementById('end_time');
-            const estimatedHours = document.getElementById('estimated_hours');
+            const moldeSelect = document.getElementById('molde_id');
+            const tipoSelect = document.getElementById('area_tipo');
+            const estimatedHoursInput = document.getElementById('estimated_hours');
+            const startTimeInput = document.getElementById('start_time');
+            const endTimeInput = document.getElementById('end_time');
 
-            function calculateHours() {
-                if (startTime.value && endTime.value) {
-                    const start = new Date(`2000-01-01T${startTime.value}`);
-                    const end = new Date(`2000-01-01T${endTime.value}`);
 
-                    // Validar que la hora final sea posterior a la inicial
-                    if (end <= start) {
-                        estimatedHours.value = '';
-                        alert('La hora de fin debe ser posterior a la hora de inicio');
-                        return;
-                    }
 
-                    const diff = (end - start) / (1000 * 60 * 60); // Diferencia en horas
-                    estimatedHours.value = diff.toFixed(1);
+            moldeSelect.addEventListener('change', function() {
+                const selected = this.options[this.selectedIndex];
+                const tipo = selected.getAttribute('data-tipo');
+                const horas = parseFloat(selected.getAttribute('data-horas')) || 0;
+
+                console.log('Molde seleccionado:', selected.text);
+                console.log('Tipo:', tipo);
+                console.log('Horas estimadas:', horas);
+                console.log(document.getElementById('area_tipo').value);
+
+                tipoSelect.value = tipo;
+
+
+                if (tipo === 'B') {
+                    estimatedHoursInput.value = horas;
+                    estimatedHoursInput.readOnly = true;
+                    calculateEndTime(); // calcula al asignar fijo
+                } else if (tipo === 'A') {
+                    estimatedHoursInput.value = '';
+                    estimatedHoursInput.readOnly = false;
+                    endTimeInput.value = ''; // limpia fin hasta que escriba horas
+                } else {
+                    // Por si viene vacío o nulo
+                    estimatedHoursInput.value = '';
+                    estimatedHoursInput.readOnly = false;
+                    endTimeInput.value = '';
                 }
+            });
+            tipoSelect.addEventListener('change', function() {
+                if (tipoSelect.value === 'A') {
+                    console.log("aqui entro");
+
+                    estimatedHoursInput.value = '';
+                    estimatedHoursInput.readOnly = false;
+                    endTimeInput.value = ''; // limpia fin hasta que escriba horas
+                }
+            });
+
+
+
+
+            // Calcular hora fin cuando cambia inicio u horas
+            startTimeInput.addEventListener('change', calculateEndTime);
+            estimatedHoursInput.addEventListener('input', function() {
+                if (tipoSelect.value === 'A') {
+                    calculateEndTime();
+                }
+            });
+
+            function calculateEndTime() {
+                const start = startTimeInput.value;
+                const estimated = parseFloat(estimatedHoursInput.value);
+
+                if (!start || isNaN(estimated)) {
+                    endTimeInput.value = '';
+                    return;
+                }
+
+                const [hours, minutes] = start.split(':').map(Number);
+                const totalMinutes = hours * 60 + minutes + estimated * 60;
+                const endHours = Math.floor(totalMinutes / 60) % 24;
+                const endMinutes = Math.round(totalMinutes % 60);
+
+                const formatted =
+                    `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
+                endTimeInput.value = formatted;
             }
-
-            startTime.addEventListener('change', calculateHours);
-            endTime.addEventListener('change', calculateHours);
-
-            // Validar horas estimadas manuales
-            estimatedHours.addEventListener('change', function() {
-                if (this.value < 0.5) {
-                    this.value = 0.5;
-                } else if (this.value > 24) {
-                    this.value = 24;
-                }
-            });
-
-            // Manejar apertura del modal
-            $('#taskModal').on('show.bs.modal', function(event) {
-                const button = $(event.relatedTarget);
-                const date = button.data('date');
-                const modal = $(this);
-
-                // Configurar para nueva tarea
-                modal.find('.modal-title').text('Nueva Tarea');
-                modal.find('#task_date').val(date);
-                modal.find('#taskId').val('');
-                modal.find('form')[0].reset();
-
-                // Establecer hora por defecto (09:00 - 10:00)
-                const now = new Date();
-                const defaultStart = now.getHours() + ':00';
-                const defaultEnd = (now.getHours() + 1) + ':00';
-
-                modal.find('#start_time').val(defaultStart);
-                modal.find('#end_time').val(defaultEnd);
-            });
-
-            // Manejar envío del formulario
-            $('#taskForm').on('submit', function(e) {
-                if (!validateTaskForm()) {
-                    e.preventDefault();
-                }
-            });
-
-            function validateTaskForm() {
-                // Validación adicional puede ir aquí
-                return true;
-            }
-
         });
     </script>
+
+
 
 
 

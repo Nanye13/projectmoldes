@@ -32,6 +32,8 @@ class TaksController extends Controller
             ->sum('estimated_hours');
     
         $horasDisponibles = $horasAsignadas - $horasUsadas;
+
+        return $horasAsignadas;
     
         if ($request->estimated_hours > $horasDisponibles) {
             return response()->json([
@@ -41,7 +43,7 @@ class TaksController extends Controller
         }
     
         // Crear la tarea
-        Task::create($request->all());
+        // Task::create($request->all());
     
         return response()->json(['success' => true]);
     }

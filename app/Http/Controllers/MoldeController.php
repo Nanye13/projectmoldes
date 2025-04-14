@@ -39,9 +39,13 @@ class MoldeController extends Controller
     {
         //
         $nombre = $request->input('nombre');
+        $tipo = $request->input('tipo');
+        $horas = $request->input('horas');
 
         Molde::create([
             'nombre' => $nombre,
+            'tipo_mantenimiento' => $tipo,
+            'horas' => $horas,
             'estatus' => 1
         ]);
         return redirect()->back()->with('status','El molde se agrego correctamente!');
@@ -80,8 +84,12 @@ class MoldeController extends Controller
     {
         //
         $nombre = $request->input('nombrem');
+        $tipo = $request->input('tipom');
+        $horas = $request->input('horasm');
         $molde = Molde::find($id);
         $molde->nombre = $nombre;
+        $molde->tipo_mantenimiento = $tipo;
+        $molde->horas = $horas;
         $molde->save();
         return redirect()->back()->with('status','El molde se edito correctamente!');
     }

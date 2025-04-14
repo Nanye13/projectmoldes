@@ -20,7 +20,7 @@ class Work_week extends Model
         'inicio_semana' => 'datetime',
         'fin_semana' => 'datetime'
     ];
-    
+
     public function tasks()
     {
         return $this->hasMany(Task::class);
@@ -29,7 +29,8 @@ class Work_week extends Model
     {
         $today = now();
         $iniciosemana = $today->startOfWeek()->format('Y-m-d'); // Lunes
-        $finsemana = $today->endOfWeek()->format('Y-m-d');     // Domingo
+        // $finsemana = $today->endOfWeek()->format('Y-m-d');     // Domingo
+        $finsemana = $today->startOfWeek()->addDays(5)->format('Y-m-d'); // Sábado
 
         return self::firstOrCreate(
             [

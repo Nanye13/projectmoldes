@@ -17,6 +17,9 @@ class Molde extends Model
      * @var array
      */
     protected $fillable = [
-        'nombre','estatus'
+        'nombre',
+        'tipo_mantenimiento',
+        'horas',
+        'estatus'
     ];
 }

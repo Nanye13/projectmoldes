@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Diasemana_tecnico;
+use App\Models\Tecnico;
 use Illuminate\Http\Request;
 
 class DiaSemanaTecController extends Controller
@@ -40,16 +41,15 @@ class DiaSemanaTecController extends Controller
         $dia_semana = $request->input('dia');
         $tecnico_id = $request->input('tecnico_id');
         $horas = $request->input('horas');
-        $tipo = $request->input('tipo');
 
-
+        $tecnico = Tecnico::find($tecnico_id);
         Diasemana_tecnico::create([
             'work_week_id' => $semana_id,
             'dia_semana' => $dia_semana,
             'tecnico_id' => $tecnico_id,
             'horas' => $horas,
             'estatus' => 1,
-            'area' => $tipo
+            'area' => $tecnico->area
         ]);
 
         return redirect()->back()->with('status', 'Se ha registrado correctamente!');

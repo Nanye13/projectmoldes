@@ -38,5 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::put('daraltatecnico/{id}', [TecnicoController::class, 'altatecnico'])->name('daraltatecnico');
     Route::resource('disemtec', DiaSemanaTecController::class);
     Route::resource('task',TaksController::class);
+    Route::post('/tasks/split', [TaksController::class, 'split'])->name('tasks.split');
+
 
 });

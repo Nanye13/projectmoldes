@@ -8,6 +8,7 @@ use App\Models\Tecnico;
 use App\Models\Work_week;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PlanSemanalController extends Controller
@@ -35,12 +36,25 @@ class PlanSemanalController extends Controller
             ->groupBy('dia_semana');
 
         // Obtener todas las tareas agrupadas por fecha
-        $tareasPorDia = $week->tasks()
-            ->orderBy('priority')
+        // $tareasPorDia = $week->tasks()
+        //     ->with('molde') // Cargamos el molde relacionado
+        //     ->orderBy('priority')
+        //     ->get()
+        //     ->groupBy(function ($task) {
+        //         return Carbon::parse($task->fecha)->format('Y-m-d');
+        //     });
+
+        $tareasPorDia = DB::table('task')
+            ->join('moldes', 'task.molde_id', '=', 'moldes.id')
+            ->where('task.work_week_id', $week->id) // filtra por semana
+            ->select('task.*', 'moldes.nombre as nombre_molde')
+            ->orderBy('task.priority')
             ->get()
             ->groupBy(function ($task) {
                 return Carbon::parse($task->fecha)->format('Y-m-d');
             });
+
+
         while ($currentDate <= $week->fin_semana) {
             // Saltar si es domingo
             if ($currentDate->dayOfWeek === Carbon::SUNDAY) {
@@ -60,7 +74,8 @@ class PlanSemanalController extends Controller
             $tareasDia = $tareasPorDia->get($dateString, collect());
             $horasUsadasA = $tareasDia->where('area', 'A')->sum('estimated_hours');
             $horasUsadasB = $tareasDia->where('area', 'B')->sum('estimated_hours');
-          
+
+
 
             $days[] = [
                 'date' => $dateString,
@@ -91,7 +106,6 @@ class PlanSemanalController extends Controller
             $currentDate->addDay();
         }
         return $days;
-
     }
     //     while ($currentDate <= $week->fin_semana) {
     //         $dateString = $currentDate->format('Y-m-d');

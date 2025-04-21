@@ -29,5 +29,8 @@ class Task extends Model
     {
         return $this->belongsTo(Work_week::class);
     }
-
+    public function molde()
+    {
+        return $this->belongsTo(Molde::class, 'id');
+    }
 }

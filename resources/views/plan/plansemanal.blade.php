@@ -51,33 +51,57 @@
                     <div class="col-md p-2 border">
                         <h6 class="text-center">{{ ucfirst($day['name']) }}<br>{{ $day['date'] }}</h6>
                         <button class="btn btn-primary"
-                            onclick="guardartecdia('{{ $semana_actual->id }}','{{ $day['date'] }}','{{ $day['name'] }}')">Agregar
+                            onclick="guardartecdia('{{ $semana_actual->id }}','{{ $day['date'] }}','{{ $day['name'] }}')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                              </svg>Agregar
                             Tecnicos</button>
                         <!-- Indicadores de horas -->
+                     
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <div class="card">
-                                    <div class="card-header bg-primary text-white">Área A</div>
+                                    <div class="card-header bg-primary text-white">Tipo A</div>
                                     <div class="card-body">
                                         <p>Asignadas: {{ $day['horas_asignadas']['A'] }}h</p>
                                         <p>Utilizadas: {{ $day['horas_utilizadas']['A'] }}h</p>
-                                        <p
-                                            class="{{ $day['horas_disponibles']['A'] < 0 ? 'text-danger' : 'text-success' }}">
-                                            Disponibles: {{ $day['horas_disponibles']['A'] }}h
+                                        <p class="text-success">
+                                            Disponibles: @if ($day['horas_disponibles']['A'] > 0)
+                                                {{ $day['horas_disponibles']['A'] }}h
+                                            @else
+                                                0 h
+                                            @endif
                                         </p>
+                                        @if ($day['horas_utilizadas']['A'] > $day['horas_asignadas']['A'])
+                                            <p class="text-danger">Horas excedientes:
+
+                                                {{ $day['horas_utilizadas']['A'] - $day['horas_asignadas']['A'] }}
+                                                horas
+                                            </p>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="card">
-                                    <div class="card-header bg-info text-white">Área B</div>
+                                    <div class="card-header bg-info text-white">Tipo B</div>
                                     <div class="card-body">
                                         <p>Asignadas: {{ $day['horas_asignadas']['B'] }}h</p>
                                         <p>Utilizadas: {{ $day['horas_utilizadas']['B'] }}h</p>
-                                        <p
-                                            class="{{ $day['horas_disponibles']['B'] < 0 ? 'text-danger' : 'text-success' }}">
-                                            Disponibles: {{ $day['horas_disponibles']['B'] }}h
+                                        <p class="text-success">
+                                            Disponibles: @if ($day['horas_disponibles']['B'] > 0)
+                                                {{ $day['horas_disponibles']['B'] }}h
+                                            @else
+                                                0 h
+                                            @endif
                                         </p>
+                                        @if ($day['horas_utilizadas']['B'] > $day['horas_asignadas']['B'])
+                                            <p class="text-danger">Horas excedientes:
+
+                                                {{ $day['horas_utilizadas']['B'] - $day['horas_asignadas']['B'] }}
+                                                horas
+                                            </p>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -85,7 +109,10 @@
 
                         <!-- Formulario para agregar tarea -->
                         <button class="btn btn-primary mb-3" onclick="agregartask('{{ $day['date'] }}')">
-                            Agregar Tarea
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                              </svg> Agregar Actividad
                         </button>
 
                         <!-- Lista de tareas ordenadas por prioridad -->
@@ -95,12 +122,22 @@
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between">
                                             <div>
-                                                <span class="badge bg-secondary">#{{ $task->priority }}</span>
-                                                <strong>{{ $task->molde_id }}</strong>
+                                                @if ($task->priority == 1)
+                                                    <span>🔥 Prioridad 1 (Urgente)</span>
+                                                @elseif($task->priority == 2)
+                                                    <span>🔴 Prioridad 2 (Alta)</span>
+                                                @elseif($task->priority == 3)
+                                                    <span>🟡 Prioridad 3 (Media)</span>
+                                                @elseif($task->priority == 4)
+                                                    <span>🔵 Prioridad 4 (Baja)</span>
+                                                @elseif($task->priority == 5)
+                                                    <span>⚪ Prioridad 5 (Mínima)</span>
+                                                @endif
+                                                <strong>{{ $task->nombre_molde ?? 'Sin molde' }}</strong>
                                             </div>
                                             <div>
                                                 <span class="badge bg-{{ $task->area == 'A' ? 'primary' : 'info' }}">
-                                                    Área {{ $task->area }}
+                                                    Tipo {{ $task->area }}
                                                 </span>
                                                 <span class="text-muted">{{ $task->estimated_hours }}h</span>
                                             </div>
@@ -109,6 +146,10 @@
                                             <small>{{ $task->hora_inicio }} - {{ $task->hora_fin }}</small>
                                             <p class="mb-0">{{ $task->notes }}</p>
                                         </div>
+                                        <button class="btn btn-sm btn-warning"
+                                            onclick="dividir('{{ $task->id }}','{{ $day['date'] }}','{{ $task->estimated_hours }}','{{ $task->molde_id }}')">
+                                            Dividir
+                                        </button>
                                     </div>
                                 </div>
                             @endforeach
@@ -120,7 +161,7 @@
     </div>
 
 
-    <!-- Modal -->
+    <!-- Modal para agregar tecnico  -->
     <div class="modal fade" id="agregartecnicodia" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog">
@@ -165,12 +206,6 @@
                                 </svg></span>
                             <input type="number" class="form-control" id="horas" name="horas">
                         </div>
-                        <label for="">Tipo:</label>
-                        <select name="tipo" id="tipo" class="form-control">
-                            <option value="">--Selecciona--</option>
-                            <option value="A">Tipo A</option>
-                            <option value="B">Tipo B</option>
-                        </select>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -181,7 +216,7 @@
         </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal para agregar tarea -->
     <div class="modal fade" id="taskModal" tabindex="-1" role="dialog" aria-labelledby="taskModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -285,7 +320,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">
                             <i class="fas fa-times"></i> Cancelar
                         </button>
                         <button type="submit" class="btn btn-primary">
@@ -294,6 +329,47 @@
                     </div>
                 </form>
             </div>
+        </div>
+    </div>
+    {{-- Modal pora dividri tarea --}}
+    <div class="modal fade" id="splitTaskModal" tabindex="-1" aria-labelledby="splitTaskModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="{{ route('tasks.split') }}">
+                @csrf
+                <input type="hidden" name="task_id" id="splitTaskId">
+                <input type="hidden" name="current_date" id="splitTaskDate">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="splitTaskModalLabel">Dividir tarea</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Tarea:</strong> <span id="splitTaskName"></span></p>
+                        <select name="molde_idsplit" id="molde_idsplit" class="form-control" disabled>
+                            <option value="">--Selecciona--</option>
+                            @foreach ($moldes as $molde)
+                                <option value="{{ $molde->id }}">
+                                    {{ $molde->nombre }}
+                                </option>
+                            @endforeach
+
+                        </select>
+                        <p><strong>Horas actuales:</strong> <span id="splitTaskHours"></span></p>
+                        <label for="splitHours">Horas a mover al siguiente día:</label>
+                        <input type="number" name="split_hours" id="splitHours" class="form-control"
+                            min="1" required>
+                        <div class="form-group">
+                            <label for="start_time" class="font-weight-bold">Hora de inicio *</label>
+                            <input type="time" class="form-control" id="start_timedivi" name="start_timedivi"
+                                required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Dividir</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -398,6 +474,15 @@
         });
     </script>
 
+    <script>
+        function dividir(id_tarea, fecha, horas_estimadas, molde) {
+            $('#splitTaskModal').modal('show');
+            $('#splitTaskId').val(id_tarea);
+            $('#splitTaskDate').val(fecha);
+            $('#splitTaskHours').text(horas_estimadas);
+            $('#molde_idsplit').val(molde);
+        }
+    </script>
 
 
 

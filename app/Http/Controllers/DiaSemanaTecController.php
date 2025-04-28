@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Diasemana_tecnico;
 use App\Models\Tecnico;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class DiaSemanaTecController extends Controller
 {
@@ -42,6 +43,21 @@ class DiaSemanaTecController extends Controller
         $tecnico_id = $request->input('tecnico_id');
         $horas = $request->input('horas');
 
+        $validator = Validator::make($request->all(), [
+            'id_semana' => ['required'],
+            'dia' => ['required'],
+            'tecnico_id' => ['required'],
+            'horas'  => ['required'],
+        ], [
+            'tecnico_id.required' => 'El campo de técnico es requerido',
+            'horas.required' => 'El campo de horas es requerido'
+        ]);
+
+        // Si la validación falla, retorna con los errores
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
         $tecnico = Tecnico::find($tecnico_id);
         Diasemana_tecnico::create([
             'work_week_id' => $semana_id,
@@ -53,7 +69,6 @@ class DiaSemanaTecController extends Controller
         ]);
 
         return redirect()->back()->with('status', 'Se ha registrado correctamente!');
-
     }
 
     /**

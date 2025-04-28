@@ -37,6 +37,11 @@
                 </ul>
             </div>
         @endif
+        @if (session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
         <br>
         <br><br>
 
@@ -51,13 +56,16 @@
                     <div class="col-md p-2 border">
                         <h6 class="text-center">{{ ucfirst($day['name']) }}<br>{{ $day['date'] }}</h6>
                         <button class="btn btn-primary"
-                            onclick="guardartecdia('{{ $semana_actual->id }}','{{ $day['date'] }}','{{ $day['name'] }}')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
-                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-                              </svg>Agregar
+                            onclick="guardartecdia('{{ $semana_actual->id }}','{{ $day['date'] }}','{{ $day['name'] }}')"><svg
+                                xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-plus-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                <path
+                                    d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                            </svg>Agregar
                             Tecnicos</button>
                         <!-- Indicadores de horas -->
-                     
+
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <div class="card">
@@ -109,10 +117,12 @@
 
                         <!-- Formulario para agregar tarea -->
                         <button class="btn btn-primary mb-3" onclick="agregartask('{{ $day['date'] }}')">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
-                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-                              </svg> Agregar Actividad
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-plus-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                <path
+                                    d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                            </svg> Agregar Actividad
                         </button>
 
                         <!-- Lista de tareas ordenadas por prioridad -->
@@ -188,7 +198,7 @@
                             <input type="text" class="form-control" id="dia" name="dia">
                         </div>
                         <label for="">Técnico:</label>
-                        <select name="tecnico_id" id="tecnico_id" class="form-control">
+                        <select name="tecnico_id" id="tecnico_id" class="form-control" required>
                             <option value="">--Selecciona--</option>
                             @foreach ($tecnicos as $tec)
                                 <option value="{{ $tec->id }}">{{ $tec->nombre }} (Tipo {{ $tec->area }})
@@ -204,7 +214,7 @@
                                         d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z" />
                                     <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0" />
                                 </svg></span>
-                            <input type="number" class="form-control" id="horas" name="horas">
+                            <input type="number" class="form-control" id="horas" name="horas" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -236,7 +246,7 @@
                             <div class="col-md-8">
                                 <div class="form-group">
                                     <label for="title" class="font-weight-bold">Molde*:</label>
-                                    <select name="molde_id" id="molde_id" class="form-control">
+                                    <select name="molde_id" id="molde_id" class="form-control" required>
                                         <option value="">--Selecciona--</option>
                                         @foreach ($moldes as $molde)
                                             <option value="{{ $molde->id }}"
